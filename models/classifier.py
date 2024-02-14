@@ -10,8 +10,9 @@ from . import models, models_utils, flows_utils
 
 class MLPClassifier(pl.LightningModule):
     def __init__(
-        self, input_size: int, output_size: int,
-        hidden_sizes: List[int] = [512], activation: str = 'relu',
+        self, input_dim: int, output_dim: int,
+        hidden_sizes: List[int] = [512],
+        activation_args: Optional[Dict[str, Any]] = None,
         optimizer_args: Optional[Dict[str, Any]] = None,
         scheduler_args: Optional[Dict[str, Any]] = None,
         norm_dict: Optional[Dict[str, Any]] = None
@@ -19,14 +20,14 @@ class MLPClassifier(pl.LightningModule):
         """
         Parameters
         ----------
-        input_size : int
+        input_dim : int
             The size of the input
-        output_size: int
+        output_dim: int
             The size of the output
         hidden_sizes : list of int, optional
             The sizes of the hidden layers. Default: [512]
-        activation : str, optional
-            The activation function to use. Default: 'relu'
+        activation_args: dict, optional
+            Arguments for the activation function. Default: None
         optimizer_args : dict, optional
             Arguments for the optimizer. Default: None
         scheduler_args : dict, optional
@@ -36,8 +37,8 @@ class MLPClassifier(pl.LightningModule):
             Default: None
         """
         super().__init__()
-        self.input_size = input_size
-        self.output_size = output_size
+        self.input_dim = input_dim
+        self.output_dim = output_dim
         self.optimizer_args = optimizer_args or {}
         self.scheduler_args = scheduler_args or {}
         self.norm_dict = norm_dict
@@ -50,7 +51,7 @@ class MLPClassifier(pl.LightningModule):
         activation_fn = models_utils.get_actizvation(
             self.activation_fn)
         self.featurizer = models.MLP(
-            self.input_size, self.output_size, hidden_sizes=self.hidden_sizes,
+            self.input_dim, self.output_dim, hidden_sizes=self.hidden_sizes,
             activation_fn=activation_fn
         )
 
@@ -80,7 +81,6 @@ class MLPClassifier(pl.LightningModule):
 
         # forward pass
         y_hat = self.forward(x)
-        loss = torch.nn.CrossEntropyLoss()(y_hat, y)
 
         # calculate the accuracy
         acc = y.eq(y_hat.argmax(dim=1)).float().mean()

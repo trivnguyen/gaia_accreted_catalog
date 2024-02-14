@@ -77,11 +77,7 @@ def train(
 
     # create model
     model = classifier.Classifier(
-        output_size=config.output_size,
-        featurizer_args=config.featurizer,
-        optimizer_args=config.optimizer,
-        scheduler_args=config.scheduler,
-        norm_dict=norm_dict,
+        input_dim
     )
 
     # create the trainer object

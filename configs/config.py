@@ -10,7 +10,7 @@ def get_config():
     cfg.data = config_dict.ConfigDict()
     cfg.data.root = 'root'
     cfg.data.name = ''
-    cfg.data.labels = ['M_sat', 'vz']
+    cfg.data.features = ['feh', 'age']
 
     # logging configuration
     cfg.workdir = './logging/'
@@ -25,6 +25,9 @@ def get_config():
 
     # evaluation configuration
     cfg.eval_batch_size = 1024
+
+    # loss configuration
+    cfg.class_weight = None
 
     # model configuration
     cfg.model = config_dict.ConfigDict()
