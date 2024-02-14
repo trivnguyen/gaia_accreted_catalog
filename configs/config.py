@@ -11,7 +11,6 @@ def get_config():
     cfg.data.root = 'root'
     cfg.data.name = ''
     cfg.data.labels = ['M_sat', 'vz']
-    cfg.data.num_bins = 10
 
     # logging configuration
     cfg.workdir = './logging/'
@@ -21,33 +20,19 @@ def get_config():
     # training configuration
     # batching and shuffling
     cfg.train_frac = 0.8
-    cfg.train_batch_size = 128
+    cfg.train_batch_size = 1024
     cfg.num_workers = 4
 
     # evaluation configuration
-    cfg.eval_batch_size = 128
+    cfg.eval_batch_size = 1024
 
     # model configuration
-    cfg.output_size = len(cfg.data.labels)
-    cfg.featurizer = config_dict.ConfigDict()
-    cfg.featurizer.name = 'transformer'
-    cfg.featurizer.d_feat_in = 10
-    cfg.featurizer.d_time_in = 1
-    cfg.featurizer.d_feat = 32
-    cfg.featurizer.d_time = 32
-    cfg.featurizer.nhead = 4
-    cfg.featurizer.num_encoder_layers = 3
-    cfg.featurizer.dim_feedforward = 128
-    cfg.featurizer.batch_first = True
-    cfg.featurizer.activation = config_dict.ConfigDict()
-    cfg.featurizer.activation.name = 'Identity'
-    cfg.flows = config_dict.ConfigDict()
-    cfg.flows.name = 'maf'
-    cfg.flows.hidden_size = 64
-    cfg.flows.num_blocks = 2
-    cfg.flows.num_layers = 4
-    cfg.flows.activation = config_dict.ConfigDict()
-    cfg.flows.activation.name = 'tanh'
+    cfg.model = config_dict.ConfigDict()
+    cfg.model.input_size = 2
+    cfg.model.output_size = 1  # also the number of classe
+    cfg.model.hidden_sizes = [64, 64]
+    cfg.model.activation = config_dict.ConfigDict()
+    cfg.model.activation.name = 'ReLU'
 
     # optimizer and scheduler configuration
     cfg.optimizer = config_dict.ConfigDict()
