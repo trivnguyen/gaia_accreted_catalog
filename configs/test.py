@@ -4,38 +4,50 @@ from ml_collections import config_dict
 def get_config():
     cfg = config_dict.ConfigDict()
 
-    cfg.seed = 40
+    cfg.seed = 42
 
     # data configuration
     cfg.data = config_dict.ConfigDict()
-    cfg.data.root = '/ocean/projects/phy210068p/tvnguyen/accreted_catalog/datasets'
-    cfg.data.name = 'AnankeDR3_m12i_lsr012'
-    cfg.data.num_datasets = 1
-    cfg.data.features = ['ra', 'dec', 'pmra', 'pmdec', 'parallax']
+    cfg.data.root = 'root'
+    cfg.data.name = ''
+    cfg.data.labels = ['M_sat', 'vz']
+    cfg.data.num_bins = 10
 
     # logging configuration
-    cfg.workdir = '/ocean/projects/phy210068p/tvnguyen/accreted_catalog/logging'
+    cfg.workdir = './logging/'
+    cfg.name = 'default'
     cfg.enable_progress_bar = False
 
     # training configuration
     # batching and shuffling
     cfg.train_frac = 0.8
-    cfg.train_batch_size = 1024
+    cfg.train_batch_size = 128
     cfg.num_workers = 4
 
     # evaluation configuration
-    cfg.eval_batch_size = 1024
-
-    # loss configuration
-    cfg.class_weight = None
+    cfg.eval_batch_size = 128
 
     # model configuration
-    cfg.model = config_dict.ConfigDict()
-    cfg.model.input_dim = len(cfg.data.features)
-    cfg.model.output_dim = 2  # also the number of classe
-    cfg.model.hidden_sizes = [64, 64]
-    cfg.model.activation = config_dict.ConfigDict()
-    cfg.model.activation.name = 'ReLU'
+    cfg.output_size = len(cfg.data.labels)
+    cfg.featurizer = config_dict.ConfigDict()
+    cfg.featurizer.name = 'transformer'
+    cfg.featurizer.d_feat_in = 10
+    cfg.featurizer.d_time_in = 1
+    cfg.featurizer.d_feat = 32
+    cfg.featurizer.d_time = 32
+    cfg.featurizer.nhead = 4
+    cfg.featurizer.num_encoder_layers = 3
+    cfg.featurizer.dim_feedforward = 128
+    cfg.featurizer.batch_first = True
+    cfg.featurizer.activation = config_dict.ConfigDict()
+    cfg.featurizer.activation.name = 'Identity'
+    cfg.flows = config_dict.ConfigDict()
+    cfg.flows.name = 'maf'
+    cfg.flows.hidden_size = 64
+    cfg.flows.num_blocks = 2
+    cfg.flows.num_layers = 4
+    cfg.flows.activation = config_dict.ConfigDict()
+    cfg.flows.activation.name = 'tanh'
 
     # optimizer and scheduler configuration
     cfg.optimizer = config_dict.ConfigDict()

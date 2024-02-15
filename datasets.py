@@ -1,5 +1,6 @@
 
 import os
+import h5py
 from pathlib import Path
 from typing import List, Tuple, Union
 
@@ -10,10 +11,20 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 
-from . import io_utils, preprocess_utils
+
+def read_dataset(data_fn: str, features: List[str] = None):
+    """ Read in the dataset from the hdf5 file. """
+    x = []
+    with h5py.File(data_fn, 'r') as f:
+        y = f['is_accreted'][:]
+        if features is not None:
+            for feature in features:
+                x.append(f[feature][:])
+    x = np.stack(x, axis=-1) if len(x) > 0 else None
+    return x, y
 
 
-def read_process_dataset(
+def read_process_datasets(
     data_dir: Union[str, Path], features: List[str],
     num_datasets: int = 1, subsample_factor: int = 1
 ):
@@ -34,7 +45,6 @@ def read_process_dataset(
 
     for i in range(num_datasets):
         data_fn = os.path.join(data_dir, f'data.{i}.hdf5')
-
         if os.path.exists(data_fn):
             print('Reading in data from {}'.format(data_fn))
         else:
@@ -42,9 +52,14 @@ def read_process_dataset(
             continue
 
         # read in the data and label
-        data = io_utils.read_dataset(data_fn, unpack=True)
+        x_i, y_i = read_dataset(data_fn, features)
+        x.append(x_i)
+        y.append(y_i)
 
-        # TODO: add the rest of the code
+    # subsample the data
+    if subsample_factor > 1:
+        x = [x_i[::subsample_factor] for x_i in x]
+        y = [y_i[::subsample_factor] for y_i in y]
 
     x = np.stack(x, axis=0)
     y = np.stack(y, axis=0)

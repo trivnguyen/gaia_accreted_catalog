@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import pytorch_lightning as pl
 
-from . import models, models_utils, flows_utils
+from . import models, models_utils
 
 
 class MLPClassifier(pl.LightningModule):

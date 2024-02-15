@@ -46,25 +46,12 @@ def train(
 
     # read in the dataset and prepare the data loader for training
     data_dir = os.path.join(config.data.root, config.data.name)
-    data_processed_path = os.path.join(data_dir, f"processed/{name}.pkl")
-    os.makedirs(os.path.dirname(data_processed_path), exist_ok=True)
-
-    if os.path.exists(data_processed_path):
-        logging.info("Loading processed data from %s", data_processed_path)
-        with open(data_processed_path, "rb") as f:
-            data = pickle.load(f)
-    else:
-        logging.info("Processing raw data from %s", data_dir)
-        data = datasets.read_process_dataset(
-            data_dir, config.data.labels, config.data.num_bins,
-            num_datasets=config.data.get("num_datasets", 1),
-            num_subsamples=config.data.get("num_subsamples", 1),
-            subsample_factor=config.data.get("subsample_factor", 1),
-            bounds=config.data.get("label_bounds", None)
-        )
-        logging.info("Saving processed data to %s", data_processed_path)
-        with open(data_processed_path, "wb") as f:
-            pickle.dump(data, f)
+    data = datasets.read_process_datasets(
+        data_dir, config.data.features,
+        num_datasets=config.data.get("num_datasets", 1),
+        subsample_factor=config.data.get("subsample_factor", 1),
+    )
+    print(data)
 
     train_loader, val_loader, norm_dict = datasets.prepare_dataloader(
         data,
@@ -77,7 +64,12 @@ def train(
 
     # create model
     model = classifier.Classifier(
-        input_dim
+        config.model.input_dim, config.model.output_dim,
+        hidden_sizes=config.model.hidden_sizes,
+        activation_args=config.model.activation,
+        optimizer_args=config.optimizer,
+        scheduler_args=config.scheduler,
+        norm_dict=norm_dict,
     )
 
     # create the trainer object
