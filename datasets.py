@@ -56,19 +56,22 @@ def read_process_datasets(
         x.append(x_i)
         y.append(y_i)
 
+    x = np.concatenate(x, axis=0)
+    y = np.concatenate(y, axis=0)
+
     # subsample the data
     if subsample_factor > 1:
-        x = [x_i[::subsample_factor] for x_i in x]
-        y = [y_i[::subsample_factor] for y_i in y]
-
-    x = np.stack(x, axis=0)
-    y = np.stack(y, axis=0)
+        x = x[::subsample_factor]
+        y = y[::subsample_factor]
 
     return x, y
 
 
 def prepare_dataloader(
-    data: Tuple,
+    data_dir: Union[str, Path],
+    features: List[str],
+    num_datasets: int = 1,
+    subsample_factor: int = 1,
     norm_dict: dict = None,
     train_frac: float = 0.8,
     train_batch_size: int = 128,
@@ -80,21 +83,30 @@ def prepare_dataloader(
     pl.seed_everything(seed)
 
     # unpack the data and convert to tensor
-    x, y = data
-    num_train = int(train_frac * len(x))
+    x, y = read_process_datasets(
+        data_dir, features, num_datasets, subsample_factor)
     shuffle = np.random.permutation(len(x))
-    x = torch.tensor(x[shuffle], dtype=torch.float32)
-    y = torch.tensor(y[shuffle], dtype=torch.float32)  # TODO: check if this is the correct dtype
+    x = x[shuffle]
+    y = y[shuffle]
+    num_train = int(train_frac * len(x))
+
+    # compute class weights
+    n0 = (y == 0).sum()
+    n1 = (y == 1).sum()
+    w0 = (n1 + n0) / n0
+    w1 = (n1 + n0) / n1
+    class_weights = [w0, w1]
 
     # normalize the data
     if norm_dict is None:
-        x_loc = x[:num_train].mean(dim=0)
-        x_scale = x[:num_train].std(dim=0)
+        x_loc = x[:num_train].mean(axis=0)
+        x_scale = x[:num_train].std(axis=0)
         norm_dict = {"x_loc": x_loc, "x_scale": x_scale,}
     else:
         x_loc = norm_dict["x_loc"]
         x_scale = norm_dict["x_scale"]
-    x = (x - x_loc) / x_scale
+    x = torch.tensor(x, dtype=torch.float32)
+    y = torch.tensor(y, dtype=torch.long)
 
     # create data loader
     train_dset = TensorDataset(x[:num_train], y[:num_train])
@@ -106,4 +118,4 @@ def prepare_dataloader(
         val_dset, batch_size=eval_batch_size, shuffle=False,
         num_workers=num_workers, pin_memory=torch.cuda.is_available())
 
-    return train_loader, val_loader, norm_dict
+    return train_loader, val_loader, norm_dict, class_weights

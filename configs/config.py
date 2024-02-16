@@ -10,40 +10,40 @@ def get_config():
     cfg.data = config_dict.ConfigDict()
     cfg.data.root = '/ocean/projects/phy210068p/tvnguyen/accreted_catalog/datasets'
     cfg.data.name = 'AnankeDR3_m12i_lsr012'
-    cfg.data.num_datasets = 1
+    cfg.data.num_datasets = 10
     cfg.data.features = ['ra', 'dec', 'pmra', 'pmdec', 'parallax']
 
     # logging configuration
     cfg.workdir = '/ocean/projects/phy210068p/tvnguyen/accreted_catalog/logging'
-    cfg.enable_progress_bar = False
+    cfg.enable_progress_bar = True
 
     # training configuration
     # batching and shuffling
     cfg.train_frac = 0.8
-    cfg.train_batch_size = 1024
+    cfg.train_batch_size = 8192
     cfg.num_workers = 4
 
     # evaluation configuration
-    cfg.eval_batch_size = 1024
+    cfg.eval_batch_size = 8192
 
     # loss configuration
-    cfg.class_weight = None
+    cfg.class_weights = None
 
     # model configuration
     cfg.model = config_dict.ConfigDict()
     cfg.model.input_dim = len(cfg.data.features)
     cfg.model.output_dim = 2  # also the number of classe
-    cfg.model.hidden_sizes = [64, 64]
+    cfg.model.hidden_sizes = [100, 50]
     cfg.model.activation = config_dict.ConfigDict()
     cfg.model.activation.name = 'ReLU'
 
     # optimizer and scheduler configuration
     cfg.optimizer = config_dict.ConfigDict()
-    cfg.optimizer.name = 'AdamW'
+    cfg.optimizer.name = 'Adam'
     cfg.optimizer.lr = 5e-4
-    cfg.optimizer.betas = (0.9, 0.98)
+    cfg.optimizer.betas = (0.9, 0.999)
     cfg.optimizer.weight_decay = 1e-4
-    cfg.optimizer.eps = 1e-9
+    cfg.optimizer.eps = 1e-8
     cfg.scheduler = config_dict.ConfigDict()
     cfg.scheduler.name = 'WarmUpCosineAnnealingLR'
     cfg.scheduler.decay_steps = 100_000  # include warmup steps

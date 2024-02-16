@@ -12,12 +12,14 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 from absl import flags, logging
 from ml_collections import config_flags
+from memory_profiler import profile
 
 import datasets
 from models import models, classifier, utils
 
 logging.set_verbosity(logging.INFO)
 
+@profile
 def train(
     config: ml_collections.ConfigDict, workdir: str = "./logging/"
 ):
@@ -43,18 +45,20 @@ def train(
             raise ValueError(
                 f"Workdir {workdir} already exists. Please set overwrite=True "
                 "to overwrite the existing directory.")
+    else:
+        os.makedirs(workdir)
+
+    # copy the config to the workdir
+    with open(os.path.join(workdir, "config.yaml"), "w") as f:
+        f.write(config.to_yaml())
 
     # read in the dataset and prepare the data loader for training
     data_dir = os.path.join(config.data.root, config.data.name)
-    data = datasets.read_process_datasets(
+
+    train_loader, val_loader, norm_dict, class_weights = datasets.prepare_dataloader(
         data_dir, config.data.features,
         num_datasets=config.data.get("num_datasets", 1),
         subsample_factor=config.data.get("subsample_factor", 1),
-    )
-    print(data)
-
-    train_loader, val_loader, norm_dict = datasets.prepare_dataloader(
-        data,
         train_frac=config.train_frac,
         train_batch_size=config.train_batch_size,
         eval_batch_size=config.eval_batch_size,
@@ -63,12 +67,16 @@ def train(
     )
 
     # create model
-    model = classifier.Classifier(
+    class_weights = config.class_weights or class_weights
+    logging.info("Using class weights: {}".format(class_weights))
+
+    model = classifier.MLPClassifier(
         config.model.input_dim, config.model.output_dim,
         hidden_sizes=config.model.hidden_sizes,
         activation_args=config.model.activation,
         optimizer_args=config.optimizer,
         scheduler_args=config.scheduler,
+        class_weights=config.class_weights,
         norm_dict=norm_dict,
     )
 
