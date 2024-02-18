@@ -91,8 +91,8 @@ def prepare_dataloader(
     num_train = int(train_frac * len(x))
 
     # compute class weights
-    n0 = (y == 0).sum()
-    n1 = (y == 1).sum()
+    n0 = numpy.count_nonzero(y==0)
+    n1 = numpy.count_nonzero(y==1)
     w0 = (n1 + n0) / n0
     w1 = (n1 + n0) / n1
     class_weights = [w0, w1]
@@ -105,6 +105,12 @@ def prepare_dataloader(
     else:
         x_loc = norm_dict["x_loc"]
         x_scale = norm_dict["x_scale"]
+    # NOTE: Do not change this to x = (x-x_loc) / x_scale because it's not in-place
+    # and cost more memory
+    x -= x_loc
+    x /= x_scale
+
+    # convert to tensor
     x = torch.tensor(x, dtype=torch.float32)
     y = torch.tensor(y, dtype=torch.long)
 
@@ -119,3 +125,4 @@ def prepare_dataloader(
         num_workers=num_workers, pin_memory=torch.cuda.is_available())
 
     return train_loader, val_loader, norm_dict, class_weights
+

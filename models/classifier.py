@@ -72,12 +72,12 @@ class MLPClassifier(pl.LightningModule):
         x = x.to(self.device)
         y = y.to(self.device)
 
-        # normalize the inputs
-        x_loc = torch.tensor(
-            self.norm_dict['x_loc'], dtype=torch.float32, device=self.device)
-        x_scale = torch.tensor(
-            self.norm_dict['x_scale'], dtype=torch.float32, device=self.device)
-        x = (x - x_loc) / x_scale
+        # # normalize the inputs
+        # x_loc = torch.tensor(
+        #     self.norm_dict['x_loc'], dtype=torch.float32, device=self.device)
+        # x_scale = torch.tensor(
+        #     self.norm_dict['x_scale'], dtype=torch.float32, device=self.device)
+        # x = (x - x_loc) / x_scale
 
         # return a dictionary of the inputs
         return_dict = {

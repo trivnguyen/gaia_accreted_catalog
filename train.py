@@ -24,7 +24,7 @@ def train(
     config: ml_collections.ConfigDict, workdir: str = "./logging/"
 ):
     # set up work directory
-    if not hasattr(config, "name"):
+    if config.get("name", None) is None:
         name = utils.get_random_name()
     else:
         name = config["name"]

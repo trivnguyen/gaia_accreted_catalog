@@ -21,7 +21,7 @@ def get_config():
     # batching and shuffling
     cfg.train_frac = 0.8
     cfg.train_batch_size = 8192
-    cfg.num_workers = 4
+    cfg.num_workers = 1
 
     # evaluation configuration
     cfg.eval_batch_size = 8192
