@@ -16,10 +16,18 @@ def read_dataset(data_fn: str, features: List[str] = None):
     """ Read in the dataset from the hdf5 file. """
     x = []
     with h5py.File(data_fn, 'r') as f:
-        y = f['is_accreted'][:]
         if features is not None:
+            # if radial velocity is in the features, get only the stars with
+            # availabel radial velocity
+            if 'radial_velocity' in features:
+                mask = ~np.isnan(f['radial_velocity'][:])
+            else:
+                mask = np.ones(len(f['ra']), dtype=bool)
+
+            y = f['is_accreted'][mask]
             for feature in features:
-                x.append(f[feature][:])
+                x.append(f[feature][mask])
+
     x = np.stack(x, axis=-1) if len(x) > 0 else None
     return x, y
 
