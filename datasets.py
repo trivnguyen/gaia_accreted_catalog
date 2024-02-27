@@ -99,8 +99,8 @@ def prepare_dataloader(
     num_train = int(train_frac * len(x))
 
     # compute class weights
-    n0 = (y == 0).sum()
-    n1 = (y == 1).sum()
+    n0 = np.count_nonzero(y == 0)
+    n1 = np.count_nonzero(y == 1)
     w0 = (n1 + n0) / n0
     w1 = (n1 + n0) / n1
     class_weights = [w0, w1]
