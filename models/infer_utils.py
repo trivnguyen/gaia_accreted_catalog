@@ -26,3 +26,20 @@ def infer(model, loader, softmax=False, to_numpy=True, verbose=True):
         y_pred = y_pred.numpy()
         y_true = y_true.numpy()
     return y_pred, y_true
+
+def eff(y_true, y_score, thresholds):
+    """ Get the efficiency and purity for a given threshold """
+    epsilon_0 = []  # efficiency for class 0
+    epsilon_1 = []  # efficiency for class 1
+    purity = []  # purity for class 1
+    for threshold in thresholds:
+        y_pred = (y_score > threshold)
+        tp = np.sum((y_pred == 1) & (y_true == 1))
+        fp = np.sum((y_pred == 1) & (y_true == 0))
+        tn = np.sum((y_pred == 0) & (y_true == 0))
+        fn = np.sum((y_pred == 0) & (y_true == 1))
+
+        epsilon_0.append(fp / (tn + fp))
+        epsilon_1.append(tp / (tp + fn))
+        purity.append(tp / (tp + fp))
+    return np.array(epsilon_0), np.array(epsilon_1), np.array(purity)
