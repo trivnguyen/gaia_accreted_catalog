@@ -76,7 +76,7 @@ def train(
         activation_args=config.model.activation,
         optimizer_args=config.optimizer,
         scheduler_args=config.scheduler,
-        class_weights=config.class_weights,
+        class_weights=class_weights,
         norm_dict=norm_dict,
     )
 
