@@ -68,7 +68,7 @@ def train(
     )
 
     # create model
-    class_weights = config.class_weights or class_weights
+    class_weights = config.get('class_weights') or class_weights
     logging.info("Using class weights: {}".format(class_weights))
 
     model = classifier.MLPClassifier(

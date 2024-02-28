@@ -73,14 +73,14 @@ def train_transfer(
     # load the model from the previous run
     if config.transfer_class_weights:
         model = classifier.MLPClassifier.load_from_checkpoint(
-            checkpoint_path, transfer_layers=config.transfer_layers,
+            transfer_checkpoint_path, transfer_layers=config.transfer_layers,
             norm_dict=norm_dict, strict=False)
     else:
         class_weights = config.get('class_weights') or class_weights
         logging.info("Using class weights: {}".format(class_weights))
 
         model = classifier.MLPClassifier.load_from_checkpoint(
-            checkpoint_path, transfer_layers=config.transfer_layers,
+            transfer_checkpoint_path, transfer_layers=config.transfer_layers,
             norm_dict=norm_dict, class_weights=class_weights, strict=False)
 
     # create the trainer object
