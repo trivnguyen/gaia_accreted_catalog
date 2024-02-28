@@ -16,7 +16,8 @@ class MLPClassifier(pl.LightningModule):
         optimizer_args: Optional[Dict[str, Any]] = None,
         scheduler_args: Optional[Dict[str, Any]] = None,
         class_weights: Optional[List[float]] = None,
-        norm_dict: Optional[Dict[str, Any]] = None
+        norm_dict: Optional[Dict[str, Any]] = None,
+        transfer_layers: Optional[List[int]] = None
     ):
         """
         Parameters
@@ -38,6 +39,8 @@ class MLPClassifier(pl.LightningModule):
         norm_dict : dict, optional
             The normalization dictionary. For bookkeeping purposes only.
             Default: None
+        transfer_layers: list of int, optional
+            The layers to freeze. Default: None
         """
         super().__init__()
         self.input_dim = input_dim
@@ -48,6 +51,7 @@ class MLPClassifier(pl.LightningModule):
         self.scheduler_args = scheduler_args or {}
         self.class_weights = class_weights
         self.norm_dict = norm_dict
+        self.transfer_layers = transfer_layers
         self.save_hyperparameters()
 
         self._setup_model()
@@ -56,8 +60,8 @@ class MLPClassifier(pl.LightningModule):
         # create the featurizer
         activation_fn = models_utils.get_activation(self.activation_args)
         self.featurizer = models.MLP(
-            self.input_dim, self.output_dim, hidden_sizes=self.hidden_sizes,
-            activation_fn=activation_fn
+            self.input_dim, self.output_dim, hidden_sizes=self.hidden_sizes, activation_fn=activation_fn,
+            transfer_layers=self.transfer_layers
         )
 
         if self.class_weights is not None:
