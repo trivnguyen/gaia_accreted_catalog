@@ -81,6 +81,7 @@ def prepare_dataloader(
     num_datasets: int = 1,
     subsample_factor: int = 1,
     norm_dict: dict = None,
+    class_weight_scales: List[float] = None,
     train_frac: float = 0.8,
     train_batch_size: int = 128,
     eval_batch_size: int = 128,
@@ -104,6 +105,8 @@ def prepare_dataloader(
     w0 = (n1 + n0) / n0
     w1 = (n1 + n0) / n1
     class_weights = [w0, w1]
+    if class_weight_scales is not None:
+        class_weights = [w * s for w, s in zip(class_weights, class_weight_scales)]
 
     # normalize the data
     if norm_dict is None:
