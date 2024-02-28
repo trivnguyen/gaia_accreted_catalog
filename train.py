@@ -59,6 +59,7 @@ def train(
         data_dir, config.data.features,
         num_datasets=config.data.get("num_datasets", 1),
         subsample_factor=config.data.get("subsample_factor", 1),
+        class_weight_scales=config.class_weight_scales,
         train_frac=config.train_frac,
         train_batch_size=config.train_batch_size,
         eval_batch_size=config.eval_batch_size,
@@ -77,6 +78,7 @@ def train(
         optimizer_args=config.optimizer,
         scheduler_args=config.scheduler,
         class_weights=class_weights,
+        transfer_layers=config.model.get("transfer_layers", None),
         norm_dict=norm_dict,
     )
 
@@ -105,8 +107,7 @@ def train(
     logging.info("Training model...")
     trainer.fit(
         model, train_loader, val_loader,
-        ckpt_path=checkpoint_path
-    )
+        ckpt_path=checkpoint_path)
 
 if __name__ == "__main__":
     FLAGS = flags.FLAGS
